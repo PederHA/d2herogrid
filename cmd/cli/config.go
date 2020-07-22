@@ -48,7 +48,8 @@ func autodetectUserdataDir() (string, error) {
 	case "windows":
 		return "C:/Program Files(x86)/Steam/userdata/", nil
 	case "darwin":
-		return "~/Library/Application Support/Steam/userdata/", nil
+		return "/Users/Peder-MAC/Library/Application Support/Steam/userdata/19123403/570/remote/cfg/hero_grid_config.json", nil
+		//return "~/Library/Application Support/Steam/userdata/", nil
 	case "linux":
 		return "~/Steam/userdata/", nil
 	default:

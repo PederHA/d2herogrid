@@ -21,12 +21,25 @@ func (b *brackets) Set(val string) error {
 	return nil
 }
 
-func Parse() *UserConfig {
+func Parse() (*UserConfig, error) {
+	var err error
+	var path string
 	var b brackets
+
 	flag.Var(&b, "b", "Bracket")
+	if b == nil {
+		b = brackets(defaultBrackets)
+	}
 	name := flag.String("n", defaultGridName, "Grid name")
 	layout := flag.Int("l", defaultLayout, fmt.Sprintf("Grid layout (0-%d)", LayoutRole))
-	path := flag.String("p", "", "Dota userdata directory path")
+	path = *(flag.String("p", "", "Dota userdata directory path"))
+	if path == "" {
+		path, err = autodetectUserdataDir()
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	sortAsc := flag.Bool("s", false, "Sort ascending (low-high)")
 	flag.Parse()
 
@@ -34,7 +47,7 @@ func Parse() *UserConfig {
 		[]int(b),
 		*name,
 		*layout,
-		*path,
+		path,
 		*sortAsc,
-	)
+	), nil
 }

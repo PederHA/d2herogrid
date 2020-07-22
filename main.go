@@ -7,7 +7,10 @@ import (
 )
 
 func main() {
-	cfg := cli.Parse()
+	cfg, err := cli.Parse()
+	if err != nil {
+		panic(err)
+	}
 	hgc, err := model.NewHeroGridConfig(cfg.Path)
 	if err != nil {
 		panic(err)
