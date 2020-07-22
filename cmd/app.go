@@ -2,8 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"sort"
 
 	"github.com/PederHA/d2herogrid/cmd/cli"
+	"github.com/PederHA/d2herogrid/cmd/client"
 	"github.com/PederHA/d2herogrid/pkg/model"
 )
 
@@ -22,5 +25,10 @@ func NewApp(config *cli.UserConfig, hgc *model.HeroGridConfig) *App {
 func (a *App) Run() {
 	// do stuff
 	//a.HeroGridConfig.ListGrids()
-	fmt.Printf("%s", a.HeroGridConfig.String())
+	heroes, err := client.Get()
+	if err != nil {
+		log.Fatal(err)
+	}
+	sort.Sort(client.ByDivine(heroes.Heroes))
+	fmt.Printf("%v", heroes)
 }
