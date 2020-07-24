@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"sort"
 
 	"github.com/PederHA/d2herogrid/cmd/cli"
@@ -15,6 +14,7 @@ type App struct {
 	HeroGridConfig *model.HeroGridConfig
 }
 
+// NewApp creates a new d2herogrid app
 func NewApp(config *cli.UserConfig, hgc *model.HeroGridConfig) *App {
 	return &App{
 		UserConfig:     config,
@@ -22,13 +22,24 @@ func NewApp(config *cli.UserConfig, hgc *model.HeroGridConfig) *App {
 	}
 }
 
-func (a *App) Run() {
-	// do stuff
-	//a.HeroGridConfig.ListGrids()
-	heroes, err := client.Get()
+// Run fetches OpenDota hero data, then creates HeroGrids as specified in the UserConfig
+func (a *App) Run() error {
+	// Get Hero Winrates from OpenDota API
+	heroes, err := client.GetHeroStats()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	sort.Sort(client.ByDivine(heroes.Heroes))
+	// Sort heroes by winrate
+	// TODO: Winrate in a specific skill bracket
+	sort.Sort(model.ByDivine(heroes.Heroes))
 	fmt.Printf("%v", heroes)
+
+	// Create New Hero Grid using specified layout
+	//
+
+	// Save hero grid
+	//
+
+	// No error occured
+	return nil
 }

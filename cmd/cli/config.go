@@ -34,6 +34,8 @@ func NewUserConfigDefaults() *UserConfig {
 	if err != nil {
 		log.Println(err)
 	}
+	// TODO: Do something like Python's Path.iterdir() to get subdirectories
+	// 		 so user can choose the correct userdata directory
 	return NewUserConfig(
 		defaultBrackets,
 		defaultGridName,
