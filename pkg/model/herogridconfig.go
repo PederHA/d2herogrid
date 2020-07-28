@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"math"
@@ -133,7 +134,16 @@ func (h *HeroGridConfig) getHeroGrid(name string) *HeroGrid {
 }
 
 func (h *HeroGridConfig) newSingleGrid(gridName string, bracket string, heroes *Heroes) (*HeroGrid, error) {
-	return nil, nil
+	grid, err := NewHeroGrid(gridName, []string{"Heroes"})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, hero := range *heroes {
+		grid.Categories[0].HeroIDs = append(grid.Categories[0].HeroIDs, hero.HeroID)
+	}
+
+	return grid, nil
 }
 
 func (h *HeroGridConfig) newMainStatGrid(gridName string, bracket string, heroes *Heroes) (*HeroGrid, error) {
@@ -167,15 +177,15 @@ func (h *HeroGridConfig) newAttackTypeGrid(gridName string, bracket string, hero
 }
 
 func (h *HeroGridConfig) newRoleGrid(gridName string, bracket string, heroes *Heroes) (*HeroGrid, error) {
-	return nil, nil
+	return nil, errors.New("Role grid is not yet implemented")
 }
 
 func (h *HeroGridConfig) newLegsGrid(gridName string, bracket string, heroes *Heroes) (*HeroGrid, error) {
-	return nil, nil
+	return nil, errors.New("Legs grid is not yet implemented")
 }
 
 func (h *HeroGridConfig) newNoneGrid(gridName string, bracket string, heroes *Heroes) (*HeroGrid, error) {
-	return nil, nil
+	return nil, errors.New("None grid is not yet implemented")
 }
 
 func (h *HeroGridConfig) addHeroGrid(gridName string, grid *HeroGrid) error {
@@ -282,6 +292,7 @@ func (c *Category) String() string {
 }
 
 func getCfgName(basename string, bracket string) string {
+	// FIXME: This should include layout as well
 	return fmt.Sprintf("%s (%s)", basename, bracket)
 }
 
