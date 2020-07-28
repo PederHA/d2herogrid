@@ -13,13 +13,14 @@ func GetHeroStats() (*model.Heroes, error) {
 	if err != nil {
 		return nil, err
 	}
-	var h = &model.Heroes{}
-	var heroes = []model.HeroStats{}
+	//var h = &model.Heroes{}
+	//var heroes = []model.HeroStats{}
+	var heroes = new(model.Heroes)
 	err = json.NewDecoder(r.Body).Decode(&heroes)
 	if err != nil {
 		return nil, err
 	}
-	h.Heroes = heroes
-	return h, nil
+	//h = Heroes(heroes)
+	return heroes, nil
 
 }

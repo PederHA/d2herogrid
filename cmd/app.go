@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"sort"
 
 	"github.com/PederHA/d2herogrid/cmd/cli"
@@ -29,17 +28,39 @@ func (a *App) Run() error {
 	if err != nil {
 		return err
 	}
+
+	// Make hero grids
+	for _, bracket := range a.UserConfig.Brackets {
+		a.makeGrid(bracket, heroes)
+	}
+
+	// Save hero grids
+	err = a.HeroGridConfig.SaveConfigJSON(a.UserConfig.Path)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *App) makeGrid(bracket string, heroes *model.Heroes) error {
+	heroes.SetSorting(bracket) // FIX
+	heroes.PrintWinrates()     // REMOVE
+
 	// Sort heroes by winrate
-	// TODO: Winrate in a specific skill bracket
-	sort.Sort(model.ByDivine(heroes.Heroes))
-	fmt.Printf("%v", heroes)
+	if a.UserConfig.SortAscending {
+		sort.Sort(heroes)
+	} else {
+		sort.Sort(sort.Reverse(heroes))
+	}
+
+	heroes.PrintWinrates() // REMOVE
 
 	// Create New Hero Grid using specified layout
-	//
+	err := a.HeroGridConfig.MakeGrid(a.UserConfig.GridName, a.UserConfig.Layout, bracket, heroes)
+	if err != nil {
+		return err
+	}
 
-	// Save hero grid
-	//
-
-	// No error occured
 	return nil
 }

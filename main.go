@@ -9,13 +9,20 @@ import (
 )
 
 func main() {
+	// Parse CLI args
 	cfg, err := cli.Parse()
 	if err != nil {
 		panic(err)
 	}
+
 	hgc, err := model.NewHeroGridConfig(cfg.Path)
 	if err != nil {
 		panic(err)
+	}
+
+	err = cfg.DumpYaml()
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	app := cmd.NewApp(cfg, hgc)
