@@ -1,92 +1,122 @@
 package cli
 
 import (
-	"flag"
+	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
+
+	"github.com/PederHA/d2herogrid/internal/utils"
+	"github.com/PederHA/d2herogrid/pkg/model"
 )
 
-//// Custom type for parsing multiple values
-//type brackets []int
-//
-//func (b *brackets) String() string {
-//	return fmt.Sprintf("%v", []int(*b))
-//}
-//
-//func (b *brackets) Set(val string) error {
-//	v, err := strconv.Atoi(val)
-//	if err != nil {
-//		return err
-//	}
-//	*b = append(*b, v)
-//	return nil
-//}
+var (
+	errNoValidBrackets = errors.New("parse: no valid brackets given")
+	invalidLayout      = "invalid layout '%s'"
+)
 
-func Parse() (*UserConfig, error) {
-	var path string
-	var err error
-
-	name := flag.String("n", defaultGridName, "Grid name")
-	layout := flag.String("l", defaultLayout, "Grid layout")
-	path = *(flag.String("p", "", "Path to Dota 2 userdata directory"))
-	if path == "" {
-		path, err = autodetectUserdataDir()
-		if err != nil {
-			return nil, err
-		}
-	}
-	sortAsc := flag.Bool("s", false, "Sort ascending (low-high) [default: high-low]")
-	flag.Parse()
-
-	b := flag.Args()
-
-	if b == nil { // NOTE: is this the correct comparison?
-		b = defaultBrackets
-	}
-
-	// Only include valid brackets
-	//for _, bracket := range b {
-	//	// Everything is title-cased
-	//	bracket = strings.Title(bracket)
-	//	if _, ok := Brackets[bracket]; ok {
-	//		brackets = append(brackets, bracket)
-	//	} else {
-	//		// Just warn for now
-	//		fmt.Fprintf(os.Stderr, "Argument '%s' is not a valid skill bracket\n", bracket)
-	//	}
-	//}
-	b, err := parseBrackets(b)
+// Parse parses command-line arguments and returns a new UserConfig
+func Parse(name, layout, path *string, sortAsc *bool, brackets []string) (*UserConfig, error) {
+	// LAYOUT
+	l, err := parseLayout(layout)
 	if err != nil {
 		return nil, err
 	}
 
-	// Check layout validity
-	if _, ok := Layouts[*layout]; !ok {
-		return nil, fmt.Errorf("invalid layout '%s'", *layout)
+	// PATH
+	p, err := parsePath(path)
+	if err != nil {
+		return nil, err
+	}
+
+	// BRACKETS
+	// Add default brackets if no args are given
+	if len(brackets) == 0 { // NOTE: is this the correct comparison?
+		for _, b := range DefaultBrackets {
+			brackets = append(brackets, b.Aliases[0])
+		}
+	}
+	b, err := parseBrackets(brackets)
+	if err != nil {
+		return nil, err
 	}
 
 	return NewUserConfig(
-		brackets,
 		*name,
-		*layout,
-		path,
+		b,
+		l,
+		*p,
 		*sortAsc,
 	), nil
 }
 
+func parseBrackets(br []string) (model.Brackets, error) {
+	var validBrackets model.Brackets
+	keys := make(map[*model.Bracket]bool) // Avoid duplicates
 
-func parseBrackets(brackets []string]) ([]string, error) {
-	var validBrackets []string
-	// Only include valid brackets
-	for _, bracket := range b {
-		// Everything is title-cased
-		bracket = strings.Title(bracket)
-		if _, ok := Brackets[bracket]; ok {
-			validBrackets = append(validBrackets, bracket)
-		} else {
-			return nil, fmt.Errorf("parse: argument '%s' is not a valid skill bracket", bracket)
+	for _, b := range br { // For each argument
+		b = strings.ToLower(b)
+		for _, bracket := range model.AllBrackets {
+			for _, alias := range bracket.Aliases {
+				if _, ok := keys[bracket]; !ok && b == alias { // if arg == an alias
+					keys[bracket] = true
+					validBrackets = append(validBrackets, bracket)
+				}
+			}
 		}
 	}
-	return validBrackets
+
+	if len(validBrackets) == 0 {
+		return nil, errNoValidBrackets
+	}
+
+	return validBrackets, nil
+}
+
+func parseLayout(layout *string) (*model.Layout, error) {
+	for _, l := range model.AllLayouts {
+		for _, alias := range l.Aliases {
+			if *layout == alias {
+				return l, nil
+			}
+		}
+	}
+	return nil, fmt.Errorf(invalidLayout, layout)
+}
+
+func parsePath(path *string) (*string, error) {
+	if *path == "" {
+		p, err := autodetectUserdataDir()
+		if err != nil {
+			return nil, err
+		}
+		*path = p
+	}
+
+	// Check if directory exists
+	err := utils.CheckDirExists(*path)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create filepath for hero_grid_config.json
+	fp := filepath.Join(*path, "hero_grid_config.json")
+	err = utils.CheckFileExists(fp)
+	if err != nil {
+		// Make grid if it doesn't exist
+		if os.IsNotExist(err) {
+			fmt.Printf("Creating new hero grid config at '%s'\n", fp)
+			hgc := model.NewHeroGridConfigDefault()
+			err := hgc.SaveConfigJSON(fp)
+			if err != nil {
+				fmt.Printf("Failed to create hero grid config at '%s'\n", fp)
+				return nil, err
+			}
+		} else {
+			return nil, err
+		}
+	}
+
+	return &fp, nil
 }

@@ -1,21 +1,68 @@
+// TODO: Heroes should probably be called HeroWinrates or something along those lines
+// Or called HeroStats, and contain []Hero
+
 package model
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
 
-//type Heroes struct {
-//	Heroes []HeroStats
-//}
+	"github.com/PederHA/d2herogrid/internal/utils"
+)
 
+// Heroes is a slice of HeroStats pointers
 type Heroes []*HeroStats
 
-func (h *Heroes) SetSorting(bracket string) {
+// SetSorting specifies a specific skill bracket that heroes should be sorted by.
+func (h *Heroes) SetSorting(bracket *Bracket) {
 	for _, hero := range *h {
 		hero.setSorting(bracket)
 	}
 }
 
-func (h *Heroes) PrintWinrates() {
+func (h *Heroes) DumpJSON(path string) error {
+	return utils.MarshalJSON(path, h)
+}
+
+// NewHeroesFromAPI constructs a new Heroes object from an OpenDota API call
+func NewHeroesFromAPI() (*Heroes, error) {
+	r, err := http.Get("https://api.opendota.com/api/heroStats")
+	if err != nil {
+		return nil, err
+	}
+	return newHeroes(r.Body)
+}
+
+// NewHeroesFromFile creates a new Heroes object by unmarshaling a JSON-encoded file
+func NewHeroesFromFile(filePath string) (*Heroes, error) {
+	r, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	return newHeroes(r)
+}
+
+// newHeroes is an internal JSON decoder function that decodes JSON-encoded data
+// from an io.Reader, used for both NewHeroesFrom... functions
+func newHeroes(r io.Reader) (*Heroes, error) {
+	heroes := new(Heroes)
+	err := json.NewDecoder(r).Decode(heroes)
+	if err != nil {
+		return nil, err
+	}
+	return heroes, nil
+}
+
+// Unused + internal.
+// FIXME: delete?!
+func (h *Heroes) printWinrates() {
 	for _, hero := range *h {
+		if hero.SortingWin == 0 {
+			hero.setSorting(BracketDivine)
+		}
 		fmt.Printf("%f ", float64(hero.SortingWin)/float64(hero.SortingPick))
 	}
 	fmt.Print("\n")
@@ -34,6 +81,7 @@ func (h Heroes) Less(i, j int) bool {
 		(float64(h[j].SortingWin) / float64(h[j].SortingPick))
 }
 
+// HeroStats represents the stats of a single Dota 2 hero
 type HeroStats struct {
 	ID            int    `json:"id"`
 	Name          string `json:"name"`
@@ -63,39 +111,39 @@ type HeroStats struct {
 	ProWin        int    `json:"pro_win"`
 	ProPick       int    `json:"pro_pick"`
 	ProBan        int    `json:"pro_ban"`
-	SortingWin    int    //`json:"8_win"`
-	SortingPick   int    //`json:"8_pick"`
+	SortingWin    int    `json:"-"`
+	SortingPick   int    `json:"-"`
 }
 
-func (h *HeroStats) setSorting(bracket string) {
+func (h *HeroStats) setSorting(bracket *Bracket) {
 	// Use a map or something instead?
 	// Or some stupid meta-programming with reflection?
 	switch bracket {
-	case "Herald":
+	case BracketHerald:
 		h.SortingWin = h.HeraldWin
 		h.SortingPick = h.HeraldPick
-	case "Guardian":
+	case BracketGuardian:
 		h.SortingWin = h.GuardianWin
 		h.SortingPick = h.GuardianPick
-	case "Crusader":
+	case BracketCrusader:
 		h.SortingWin = h.CrusaderWin
 		h.SortingPick = h.CrusaderPick
-	case "Archon":
+	case BracketArchon:
 		h.SortingWin = h.ArchonWin
 		h.SortingPick = h.ArchonPick
-	case "Legend":
+	case BracketLegend:
 		h.SortingWin = h.LegendWin
 		h.SortingPick = h.LegendPick
-	case "Ancient":
+	case BracketAncient:
 		h.SortingWin = h.AncientWin
 		h.SortingPick = h.AncientPick
-	case "Divine":
+	case BracketDivine:
 		h.SortingWin = h.DivineWin
 		h.SortingPick = h.DivinePick
-	case "Immortal":
+	case BracketImmortal:
 		h.SortingWin = h.ImmortalWin
 		h.SortingPick = h.ImmortalPick
-	case "Pro":
+	case BracketPro:
 		h.SortingWin = h.ProWin
 		h.SortingPick = h.ProPick
 	}

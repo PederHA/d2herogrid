@@ -4,7 +4,6 @@ import (
 	"sort"
 
 	"github.com/PederHA/d2herogrid/cmd/cli"
-	"github.com/PederHA/d2herogrid/cmd/client"
 	"github.com/PederHA/d2herogrid/pkg/model"
 )
 
@@ -24,14 +23,17 @@ func NewApp(config *cli.UserConfig, hgc *model.HeroGridConfig) *App {
 // Run fetches OpenDota hero data, then creates HeroGrids as specified in the UserConfig
 func (a *App) Run() error {
 	// Get Hero Winrates from OpenDota API
-	heroes, err := client.GetHeroStats()
+	heroes, err := model.NewHeroesFromAPI()
 	if err != nil {
 		return err
 	}
 
 	// Make hero grids
 	for _, bracket := range a.UserConfig.Brackets {
-		a.makeGrid(bracket, heroes)
+		err = a.makeGrid(bracket, heroes)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Save hero grids
@@ -43,9 +45,8 @@ func (a *App) Run() error {
 	return nil
 }
 
-func (a *App) makeGrid(bracket string, heroes *model.Heroes) error {
+func (a *App) makeGrid(bracket *model.Bracket, heroes *model.Heroes) error {
 	heroes.SetSorting(bracket) // FIX
-	heroes.PrintWinrates()     // REMOVE
 
 	// Sort heroes by winrate
 	if a.UserConfig.SortAscending {
@@ -53,8 +54,6 @@ func (a *App) makeGrid(bracket string, heroes *model.Heroes) error {
 	} else {
 		sort.Sort(sort.Reverse(heroes))
 	}
-
-	heroes.PrintWinrates() // REMOVE
 
 	// Create New Hero Grid using specified layout
 	err := a.HeroGridConfig.MakeGrid(a.UserConfig.GridName, a.UserConfig.Layout, bracket, heroes)

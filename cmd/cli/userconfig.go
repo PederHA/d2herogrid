@@ -12,28 +12,31 @@ import (
 
 	"github.com/PederHA/d2herogrid/internal/utils"
 	"github.com/PederHA/d2herogrid/pkg/config"
+	"github.com/PederHA/d2herogrid/pkg/model"
 	"gopkg.in/yaml.v3"
 )
 
 type UserConfig struct {
 	config.Config `json:"-" yaml:"-"`
-	Brackets      []string `json:"brackets" yaml:"brackets"`
-	GridName      string   `json:"grid_name" yaml:"grid_name"`
-	Layout        string   `json:"layout" yaml:"layout"`
-	Path          string   `json:"path" yaml:"path"`
-	SortAscending bool     `json:"sort_ascending" yaml:"sort_ascending"`
+	GridName      string         `json:"grid_name" yaml:"grid_name"`
+	Brackets      model.Brackets `json:"brackets" yaml:"brackets"`
+	Layout        *model.Layout  `json:"layout" yaml:"layout"`
+	Path          string         `json:"path" yaml:"path"`
+	SortAscending bool           `json:"sort_ascending" yaml:"sort_ascending"`
 }
 
-func NewUserConfig(brackets []string, gridName string, layout string, path string, sortAsc bool) *UserConfig {
+func NewUserConfig(gridName string, brackets model.Brackets, layout *model.Layout, path string, sortAsc bool) *UserConfig {
 	return &UserConfig{
-		Brackets:      brackets,
 		GridName:      gridName,
+		Brackets:      brackets,
 		Layout:        layout,
 		Path:          path,
 		SortAscending: sortAsc,
 	}
 }
 
+// NewUserConfigDefaults creates a new UserConfig using default parameters,
+// which are documented in defaults.go
 func NewUserConfigDefaults() *UserConfig {
 	path, err := autodetectUserdataDir()
 	if err != nil {
@@ -42,14 +45,16 @@ func NewUserConfigDefaults() *UserConfig {
 	// TODO: Do something like Python's Path.iterdir() to get subdirectories
 	// 		 so user can choose the correct userdata directory
 	return NewUserConfig(
-		defaultBrackets,
-		defaultGridName,
-		defaultLayout,
+		DefaultGridName,
+		DefaultBrackets,
+		DefaultLayout,
 		path,
-		defaultSortAscending,
+		DefaultSortAscending,
 	)
 }
 
+// DumpYaml saves a UserConfig as a yaml-formatted file.
+// File location is currently not very flexible, which is pretty bad.
 func (u *UserConfig) DumpYaml() error {
 	cfgFname := "config.yaml"
 
@@ -79,31 +84,23 @@ func (u *UserConfig) createConfigDir(dirname string) error {
 	// TODO: Handle malformed paths + directory paths
 
 	// Check if config dir exists
-	if ok, err := utils.CheckDirExists(dirname); err != nil {
-		return err
-	} else if !ok {
-		os.MkdirAll(dirname, os.ModePerm)
+	err := utils.CheckDirExists(dirname)
+	if err != nil {
+		if os.IsNotExist(err) {
+			os.MkdirAll(dirname, os.ModePerm)
+		} else {
+			return err
+		}
 	}
-	return nil
-
-	//// Check if config file exists
-	//if ok, err := utils.CheckFileExists(fullPath); err != nil {
-	//	return err
-	//} else if !ok {
-	//	f, err := os.Create(fullPath)
-	//	defer f.Close()
-	//	if err != nil {
-	//		return err
-	//	}
-	//}
-
 	return nil
 }
 
+// FIXME: The fucking state of this thing
 func autodetectUserdataDir() (string, error) {
 	switch runtime.GOOS {
 	case "windows":
-		return "D:\\Programming\\Go\\src\\d2herogrid\\hero_grid_config.json", nil
+		return "D:\\Programming\\Go\\src\\d2herogrid", nil
+		//return "D:\\Programming\\Go\\src\\d2herogrid\\hero_grid_config.json", nil
 		//return "C:\\Program Files (x86)\\Steam\\userdata\\19123403\\570\remote\\cfg\\hero_grid_config.json", nil
 		//return "C:/Program Files(x86)/Steam/userdata/", nil
 	case "darwin":

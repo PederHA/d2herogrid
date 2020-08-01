@@ -1,4 +1,5 @@
-*.json
 *.yml
 .vscode
 *.exe
+*.bak
+/hero_grid_config*
