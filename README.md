@@ -1,6 +1,6 @@
 # d2herogrid
 
-![logo](assets/logo/logo_3d.png)
+![logo](assets/logo/logo.png)
 
 ## Usage
 ```
