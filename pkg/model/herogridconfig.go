@@ -308,12 +308,13 @@ func NewHeroGrid(name string, categories []string) (*HeroGrid, error) {
 
 	// Assert that length of categories argument matches length of categories from switch..case
 	if len(categories) != len(h.Categories) {
-		panic("model.NewHeroGrid: Mismatched length of categories. This should never happen.")
+		return nil, errors.New("model.NewHeroGrid: Mismatched length of categories. This should never happen.")
 	}
 
 	for i, n := range categories {
 		h.Categories[i].CategoryName = n
 	}
+
 	return h, nil
 }
 
