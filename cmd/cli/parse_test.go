@@ -42,7 +42,6 @@ func TestParseBrackets(t *testing.T) {
 		want  Brackets
 		err   error
 	}{
-		{[]string{"divine", "immortal"}, Brackets{divine, immortal}, nil},
 		{[]string{"herald"}, Brackets{herald}, nil},
 		{[]string{"guardian"}, Brackets{guardian}, nil},
 		{[]string{"crusader"}, Brackets{crusader}, nil},
@@ -52,17 +51,27 @@ func TestParseBrackets(t *testing.T) {
 		{[]string{"divine"}, Brackets{divine}, nil},
 		{[]string{"immortal"}, Brackets{immortal}, nil},
 		{[]string{"pro"}, Brackets{pro}, nil},
+		{[]string{"herald", "guardian", "crusader", "archon",
+			"legend", "ancient", "divine", "immortal", "pro"},
+			Brackets(model.AllBrackets), nil,
+		},
+		{[]string{"divine", "immortal"}, Brackets{divine, immortal}, nil},
 		// Duplicate inputs
 		{[]string{"divine", "d", "7"}, Brackets{divine}, nil},
 		{[]string{"immortal", "8", "7"}, Brackets{immortal, divine}, nil},
 		{[]string{"ancient", "1", "2", "6"}, Brackets{ancient, herald, guardian}, nil},
 		// Mixed inputs (valid and invalid)
 		{[]string{"divine", "skilled", "herald", "bad"}, Brackets{divine, herald}, nil},
+		{[]string{"herald", "guardian", "crusader", "archon",
+			"legend", "ancient", "divine", "immortal", "pro", "bad", "1234"},
+			Brackets(model.AllBrackets), nil,
+		},
 		// Invalid inputs that return errors
 		{[]string{"20"}, Brackets{}, errNoValidBrackets},
 		{[]string{"Skilled"}, Brackets{}, errNoValidBrackets},
-		{[]string{"Skilled"}, Brackets{}, errNoValidBrackets},
+		{[]string{"Bad"}, Brackets{}, errNoValidBrackets},
 	}
+
 	for _, in := range iw {
 		got, err := parseBrackets(in.input)
 
@@ -111,11 +120,20 @@ func TestParseLayout(t *testing.T) {
 		err   error
 	}{
 		{"mainstat", mainstat, nil},
+		{"ms", mainstat, nil},
+		{"stat", mainstat, nil},
 		{"single", single, nil},
+		{"s", single, nil},
 		{"attack", attacktype, nil},
+		{"a", attacktype, nil},
 		{"role", role, nil},
+		{"r", role, nil},
 		{"legs", legs, nil},
+		{"l", legs, nil},
 		{"modify", modify, nil},
+		{"m", modify, nil},
+		{"none", modify, nil},
+		{"n", modify, nil},
 	}
 	for _, in := range iw {
 		got, err := parseLayout(&in.input)
