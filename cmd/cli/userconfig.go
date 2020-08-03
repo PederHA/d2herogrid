@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 	"runtime"
 
@@ -97,18 +98,22 @@ func (u *UserConfig) createConfigDir(dirname string) error {
 
 // FIXME: The fucking state of this thing
 func autodetectUserdataDir() (string, error) {
+	var s string
+	var err error
 	switch runtime.GOOS {
 	case "windows":
-		return "D:\\Programming\\Go\\src\\d2herogrid", nil
-		//return "D:\\Programming\\Go\\src\\d2herogrid\\hero_grid_config.json", nil
-		//return "C:\\Program Files (x86)\\Steam\\userdata\\19123403\\570\remote\\cfg\\hero_grid_config.json", nil
-		//return "C:/Program Files(x86)/Steam/userdata/", nil
+		s, err = getSteamPathWindows()
+		if err != nil {
+			return "", err // TODO: write a more user-friendly error
+		}
 	case "darwin":
-		return "/Users/Peder-MAC/Library/Application Support/Steam/userdata/19123403/570/remote/cfg/hero_grid_config.json", nil
-		//return "~/Library/Application Support/Steam/userdata/", nil
+		// Dynamic steam path detection NYI
+		s = "~/Library/Application Support/Steam"
 	case "linux":
-		return "~/Steam/userdata/", nil
+		// Dynamic steam path detection NYI
+		s = "~/Steam"
 	default:
-		return "", fmt.Errorf("config: Unknown OS")
+		return "", fmt.Errorf("config: Unsupported OS")
 	}
+	return path.Join(s, "userdata"), nil
 }
