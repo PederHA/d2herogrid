@@ -238,38 +238,6 @@ func (h *HeroGridConfig) modifyGrid(grid *HeroGrid, heroes *Heroes) (*HeroGrid, 
 	return grid, nil
 }
 
-func (h *HeroGridConfig) modifyGridOriginal(grid *HeroGrid, heroes *Heroes) (*HeroGrid, error) {
-	// Find a grid with the specified name
-	grid, err := h.getHeroGridByName(grid.ConfigName)
-	if err != nil {
-		return nil, err
-	}
-
-	var categories []Category
-	// Modify the existing grid
-	for _, cat := range grid.Categories {
-		var heroesCat heroesGrid // Every hero in the category has an ID and an index
-		for _, heroID := range cat.HeroIDs {
-			for idx, h := range *heroes { // param heroes is sorted by winrate
-				if heroID == h.HeroID {
-					heroesCat = append(heroesCat, hero{h.HeroID, idx})
-					break
-				}
-			}
-		}
-		// Sort heroes in category based their index (winrate)
-		sort.Sort(heroesCat)
-		var heroIDs []int
-		for _, h := range heroesCat {
-			heroIDs = append(heroIDs, h.heroID)
-		}
-		cat.HeroIDs = heroIDs
-		categories = append(categories, cat)
-	}
-	grid.Categories = categories
-	return grid, nil
-}
-
 func (h *HeroGridConfig) addHeroGrid(grid *HeroGrid) error {
 	if gridIdx, ok := h.findGridIdx(grid.ConfigName); ok {
 		h.HeroGrids[gridIdx] = *grid
