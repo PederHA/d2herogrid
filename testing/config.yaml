@@ -1,0 +1,8 @@
+grid_name: d2hg
+brackets:
+    - bracket: divine
+    - bracket: immortal
+layout:
+    layout: mainstat
+path: hero_grid_config.json
+sort_ascending: false

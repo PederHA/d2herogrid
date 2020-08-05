@@ -119,6 +119,7 @@ func TestParseLayout(t *testing.T) {
 		want  *model.Layout
 		err   error
 	}{
+		// Valid input
 		{"mainstat", mainstat, nil},
 		{"ms", mainstat, nil},
 		{"stat", mainstat, nil},
@@ -134,6 +135,8 @@ func TestParseLayout(t *testing.T) {
 		{"m", modify, nil},
 		{"none", modify, nil},
 		{"n", modify, nil},
+		// Invalid input
+		{"cool", nil, fmt.Errorf(invalidLayout, "cool")},
 	}
 	for _, in := range iw {
 		got, err := parseLayout(&in.input)
