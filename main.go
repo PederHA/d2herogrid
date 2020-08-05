@@ -41,7 +41,7 @@ func main() {
 		panic(err)
 	}
 
-	err = cfg.DumpYaml()
+	err = cfg.DumpYAML(cli.ConfigPath)
 	if err != nil {
 		log.Fatal(err)
 	}
