@@ -48,6 +48,7 @@ func NewHeroesFromFile(filePath string) (*Heroes, error) {
 // newHeroes is an internal JSON decoder function that decodes JSON-encoded data
 // from an io.Reader, used for both NewHeroesFrom... functions
 func newHeroes(r io.Reader) (*Heroes, error) {
+	// FIXME: This doesn't need to return a pointer, does it?
 	heroes := new(Heroes)
 	err := json.NewDecoder(r).Decode(heroes)
 	if err != nil {
@@ -83,36 +84,37 @@ func (h Heroes) Less(i, j int) bool {
 
 // HeroStats represents the stats of a single Dota 2 hero
 type HeroStats struct {
-	ID            int    `json:"id"`
-	Name          string `json:"name"`
-	LocalizedName string `json:"localized_name"`
-	Img           string `json:"img"`
-	Icon          string `json:"Icon"`
-	HeroID        int    `json:"hero_id"`
-	PrimaryAttr   string `json:"primary_attr"`
-	AttackType    string `json:"attack_type"`
-	Legs          int    `json:"legs"`
-	HeraldWin     int    `json:"1_win"`
-	HeraldPick    int    `json:"1_pick"`
-	GuardianWin   int    `json:"2_pick"`
-	GuardianPick  int    `json:"2_win"`
-	CrusaderWin   int    `json:"3_win"`
-	CrusaderPick  int    `json:"3_pick"`
-	ArchonWin     int    `json:"4_win"`
-	ArchonPick    int    `json:"4_pick"`
-	LegendWin     int    `json:"5_win"`
-	LegendPick    int    `json:"5_pick"`
-	AncientWin    int    `json:"6_win"`
-	AncientPick   int    `json:"6_pick"`
-	DivineWin     int    `json:"7_win"`
-	DivinePick    int    `json:"7_pick"`
-	ImmortalWin   int    `json:"8_win"`
-	ImmortalPick  int    `json:"8_pick"`
-	ProWin        int    `json:"pro_win"`
-	ProPick       int    `json:"pro_pick"`
-	ProBan        int    `json:"pro_ban"`
-	SortingWin    int    `json:"-"`
-	SortingPick   int    `json:"-"`
+	ID            int      `json:"id"`
+	Name          string   `json:"name"`
+	LocalizedName string   `json:"localized_name"`
+	Img           string   `json:"img"`
+	Icon          string   `json:"Icon"`
+	HeroID        int      `json:"hero_id"`
+	PrimaryAttr   string   `json:"primary_attr"`
+	AttackType    string   `json:"attack_type"`
+	Legs          int      `json:"legs"`
+	Roles         []string `json:"roles"`
+	HeraldWin     int      `json:"1_win"`
+	HeraldPick    int      `json:"1_pick"`
+	GuardianWin   int      `json:"2_pick"`
+	GuardianPick  int      `json:"2_win"`
+	CrusaderWin   int      `json:"3_win"`
+	CrusaderPick  int      `json:"3_pick"`
+	ArchonWin     int      `json:"4_win"`
+	ArchonPick    int      `json:"4_pick"`
+	LegendWin     int      `json:"5_win"`
+	LegendPick    int      `json:"5_pick"`
+	AncientWin    int      `json:"6_win"`
+	AncientPick   int      `json:"6_pick"`
+	DivineWin     int      `json:"7_win"`
+	DivinePick    int      `json:"7_pick"`
+	ImmortalWin   int      `json:"8_win"`
+	ImmortalPick  int      `json:"8_pick"`
+	ProWin        int      `json:"pro_win"`
+	ProPick       int      `json:"pro_pick"`
+	ProBan        int      `json:"pro_ban"`
+	SortingWin    int      `json:"-"`
+	SortingPick   int      `json:"-"`
 }
 
 func (h *HeroStats) setSorting(bracket *Bracket) {
