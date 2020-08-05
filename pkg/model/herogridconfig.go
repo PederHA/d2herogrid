@@ -152,7 +152,7 @@ func (h *HeroGridConfig) getHeroGridByName(gridName string) (*HeroGrid, error) {
 
 func (h *HeroGridConfig) newSingleGrid(grid *HeroGrid, heroes *Heroes) (*HeroGrid, error) {
 	for _, hero := range *heroes {
-		grid.Categories[0].HeroIDs = append(grid.Categories[0].HeroIDs, hero.HeroID)
+		grid.Categories[0].AppendID(hero.HeroID)
 	}
 	return grid, nil
 }
@@ -161,7 +161,7 @@ func (h *HeroGridConfig) newMainStatGrid(grid *HeroGrid, heroes *Heroes) (*HeroG
 	var categoryIdx = map[string]int{"str": 0, "agi": 1, "int": 2}
 	for _, hero := range *heroes {
 		idx := categoryIdx[hero.PrimaryAttr] // NOTE: no error checking here
-		grid.Categories[idx].HeroIDs = append(grid.Categories[idx].HeroIDs, hero.HeroID)
+		grid.Categories[idx].AppendID(hero.HeroID)
 	}
 	return grid, nil
 }
@@ -170,17 +170,54 @@ func (h *HeroGridConfig) newAttackTypeGrid(grid *HeroGrid, heroes *Heroes) (*Her
 	var categoryIdx = map[string]int{"melee": 0, "ranged": 1}
 	for _, hero := range *heroes {
 		idx := categoryIdx[hero.AttackType]
-		grid.Categories[idx].HeroIDs = append(grid.Categories[idx].HeroIDs, hero.HeroID)
+		grid.Categories[idx].AppendID(hero.HeroID)
 	}
 	return grid, nil
 }
 
 func (h *HeroGridConfig) newRoleGrid(grid *HeroGrid, heroes *Heroes) (*HeroGrid, error) {
-	return nil, errors.New("Role grid is not yet implemented")
+	// Roles:
+	// Disabler
+	// Carry
+	// Escape
+	// Jungler
+	// Nuker
+	// Initiator
+	// Pusher
+	// Support
+	// Durable
+	var categoryIdx = map[string]int{
+		"Carry":   0,
+		"Support": 1,
+		// Every other category is counted as "Flexible"
+	}
+	for _, hero := range *heroes {
+		idx := 2                 // Default to flexible
+		if len(hero.Roles) > 0 { // NOTE: Should a lack of roles return an error?
+			// Only check primary role
+			if i, ok := categoryIdx[hero.Roles[0]]; ok {
+				idx = i
+			}
+		}
+		grid.Categories[idx].AppendID(hero.HeroID)
+	}
+	return grid, nil
 }
 
 func (h *HeroGridConfig) newLegsGrid(grid *HeroGrid, heroes *Heroes) (*HeroGrid, error) {
-	return nil, errors.New("Legs grid is not yet implemented")
+	var idx int
+	for _, hero := range *heroes {
+		switch {
+		case hero.Legs < 2:
+			idx = 0
+		case hero.Legs == 2:
+			idx = 1
+		case hero.Legs > 2:
+			idx = 2
+		}
+		grid.Categories[idx].AppendID(hero.HeroID)
+	}
+	return grid, nil
 }
 
 // Below is the (shoddy) implementation of modifying an existing grid in place by
