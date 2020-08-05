@@ -13,7 +13,7 @@ func getSteamPathWindows() (string, error) {
 
 	s, _, err := k.GetStringValue("InstallPath")
 	if err != nil {
-		return "", nil
+		return "", nil // NOTE: Should we not propagate this error?
 	}
 	return s, nil
 }
