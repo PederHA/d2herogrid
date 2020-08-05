@@ -57,11 +57,15 @@ func parseBrackets(br []string) (model.Brackets, error) {
 
 	for _, b := range br { // For each argument
 		b = strings.ToLower(b)
+	bracketLoop:
 		for _, bracket := range model.AllBrackets {
-			for _, alias := range bracket.Aliases {
+			// Treat formatted name as an alias as well
+			aliases := append(bracket.Aliases, bracket.Name)
+			for _, alias := range aliases {
 				if _, ok := keys[bracket]; !ok && b == alias { // if arg == an alias
 					keys[bracket] = true
 					validBrackets = append(validBrackets, bracket)
+					break bracketLoop
 				}
 			}
 		}
@@ -76,16 +80,19 @@ func parseBrackets(br []string) (model.Brackets, error) {
 
 func parseLayout(layout *string) (*model.Layout, error) {
 	for _, l := range model.AllLayouts {
-		for _, alias := range l.Aliases {
+		// Treat formatted name as an alias as well
+		aliases := append(l.Aliases, l.Name)
+		for _, alias := range aliases {
 			if *layout == alias {
 				return l, nil
 			}
 		}
 	}
-	return nil, fmt.Errorf(invalidLayout, layout)
+	return nil, fmt.Errorf(invalidLayout, *layout)
 }
 
 func parsePath(path *string) (*string, error) {
+	// TODO: Ask user for subdirectory in userdata
 	if *path == "" {
 		p, err := autodetectUserdataDir()
 		if err != nil {
