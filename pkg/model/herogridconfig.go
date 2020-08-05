@@ -98,7 +98,7 @@ func (h *HeroGridConfig) MakeGrid(gridName string, layout *Layout, bracket *Brac
 	case LayoutModify:
 		gridFunc = h.modifyGrid
 	default:
-		return fmt.Errorf("model: encountered unknown layout '%s' when attempting to generate hero grid. This should NEVER happen", layout)
+		return fmt.Errorf("model: encountered unknown layout '%s' when attempting to generate hero grid. This should NEVER happen", layout.Name)
 	}
 
 	var cfgName string
@@ -109,7 +109,7 @@ func (h *HeroGridConfig) MakeGrid(gridName string, layout *Layout, bracket *Brac
 	}
 
 	// Make new grid
-	grid, err := NewHeroGrid(cfgName, layout.Categories)
+	grid, err := NewHeroGrid(cfgName, layout)
 	if err != nil {
 		return err
 	}
@@ -256,31 +256,14 @@ type HeroGrid struct {
 }
 
 // NewHeroGrid creates a new HeroGrid from a name and a list of categories
-func NewHeroGrid(name string, categories []string) (*HeroGrid, error) {
-	var h = &HeroGrid{ConfigName: name}
+func NewHeroGrid(name string, layout *Layout) (*HeroGrid, error) {
+	h := &HeroGrid{ConfigName: name}
+	h.Categories = make([]Category, len(layout.Categories))
+	copy(h.Categories, layout.Categories)
 
-	var cat []Category
-	switch len(categories) {
-	case 1:
-		cat = singleCategory
-	case 2:
-		cat = doubleCategory
-	case 3:
-		cat = tripleCategory
-	default:
-		return nil, fmt.Errorf("model.NewHeroGrid: expected <=3 categories, received %d", len(categories))
-	}
-
-	h.Categories = make([]Category, len(categories))
-	copy(h.Categories, cat)
-
-	// Assert that length of categories argument matches length of categories from switch..case
-	if len(categories) != len(h.Categories) {
-		return nil, errors.New("model.NewHeroGrid: Mismatched length of categories. This should never happen.")
-	}
-
-	for i, n := range categories {
-		h.Categories[i].CategoryName = n
+	// Assert that n herogrid categories is equal to n layout categories
+	if len(layout.Categories) != len(h.Categories) {
+		return nil, errors.New("model.NewHeroGrid: mismatched length of categories. This should never happen")
 	}
 
 	return h, nil
@@ -350,23 +333,10 @@ func (c *Category) String() string {
 	return b.String()
 }
 
+func (c *Category) AppendID(heroID int) {
+	c.HeroIDs = append(c.HeroIDs, heroID)
+}
+
 func getCfgName(basename, bracket, layout string) string {
 	return fmt.Sprintf("%s (%s) (%s)", basename, bracket, layout)
 }
-
-var (
-	singleCategory = []Category{
-		NewCategory("One", 0, 0, 1180, 1180),
-	}
-
-	doubleCategory = []Category{
-		NewCategory("One", 0, 0, 1180, 280),
-		NewCategory("Two", 0, 300, 1180, 280),
-	}
-
-	tripleCategory = []Category{
-		NewCategory("One", 0, 0, 1180, 180),
-		NewCategory("Two", 0, 200, 1180, 180),
-		NewCategory("Three", 0, 400, 1180, 180),
-	}
-)
