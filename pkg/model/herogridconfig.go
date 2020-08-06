@@ -11,12 +11,10 @@ import (
 	"strings"
 
 	"github.com/PederHA/d2herogrid/internal/utils"
-	"github.com/PederHA/d2herogrid/pkg/config"
 )
 
 // HeroGridConfig represents the contents of hero_grid_config.json
 type HeroGridConfig struct {
-	config.Config
 	Version   int        `json:"version"`
 	HeroGrids []HeroGrid `json:"configs"`
 }
@@ -137,7 +135,6 @@ func (h *HeroGridConfig) findGridIdx(gridName string) (int, bool) {
 	return -1, false
 }
 
-// UNUSED
 func (h *HeroGridConfig) getHeroGridByName(gridName string) (*HeroGrid, error) {
 	if idx, ok := h.findGridIdx(gridName); ok {
 		herogrid := h.HeroGrids[idx]
@@ -284,15 +281,14 @@ func (h *HeroGridConfig) addHeroGrid(grid *HeroGrid) error {
 	return nil
 }
 
-// HeroGrid represents a single hero grid, which contains optionally contains
+// HeroGrid represents a single hero grid, which optionally contains
 // 1 or more category.
 type HeroGrid struct {
-	config.Config
 	ConfigName string     `json:"config_name"`
 	Categories []Category `json:"categories"`
 }
 
-// NewHeroGrid creates a new HeroGrid from a name and a list of categories
+// NewHeroGrid creates a new HeroGrid from a name and a layout
 func NewHeroGrid(name string, layout *Layout) (*HeroGrid, error) {
 	h := &HeroGrid{ConfigName: name}
 	h.Categories = make([]Category, len(layout.Categories))
@@ -317,7 +313,6 @@ func (h *HeroGrid) String() string {
 
 // Category represents a single category within a hero grid
 type Category struct {
-	config.Config
 	CategoryName string  `json:"category_name"`
 	XPosition    float64 `json:"x_position"`
 	YPosition    float64 `json:"y_position"`

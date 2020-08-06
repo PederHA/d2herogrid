@@ -13,7 +13,6 @@ import (
 	"runtime"
 
 	"github.com/PederHA/d2herogrid/internal/utils"
-	"github.com/PederHA/d2herogrid/pkg/config"
 	"github.com/PederHA/d2herogrid/pkg/model"
 	"github.com/mitchellh/go-homedir"
 )
@@ -38,7 +37,6 @@ func init() {
 }
 
 type UserConfig struct {
-	config.Config `json:"-" yaml:"-"`
 	GridName      string         `json:"grid_name" yaml:"grid_name"`
 	Brackets      model.Brackets `json:"brackets" yaml:"brackets"`
 	Layout        *model.Layout  `json:"layout" yaml:"layout"`
