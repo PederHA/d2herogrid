@@ -73,11 +73,11 @@ func TestMain(m *testing.M) {
 	teardown()
 }
 
-func TestHeroGridConfig_MakeGridLayoutModify(t *testing.T) {
-	for _, bracket := range AllBrackets {
-		heroes.SetSorting(bracket)
-		sort.Sort(heroes)
-		for _, gridName := range gridNames {
+func TestHeroGridConfig_MakeGrid_LayoutModify(t *testing.T) {
+	for _, gridName := range gridNames {
+		for _, bracket := range AllBrackets {
+			heroes.SetSorting(bracket)
+			sort.Sort(heroes)
 			err := hgc.MakeGrid(gridName, LayoutModify, bracket, heroes)
 			if err != nil {
 				t.Error(err)
@@ -93,9 +93,6 @@ func TestHeroGridConfig_MakeGrid(t *testing.T) {
 		heroes.SetSorting(bracket)
 		sort.Sort(heroes)
 		for _, layout := range AllLayouts {
-			if layout == LayoutLegs || layout == LayoutRole || layout == LayoutModify {
-				continue
-			}
 			for _, gridName := range gridNames {
 				err := hgc.MakeGrid(gridName, layout, bracket, heroes)
 				if err != nil {
