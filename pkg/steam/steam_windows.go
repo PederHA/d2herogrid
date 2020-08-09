@@ -1,10 +1,10 @@
 // +build windows
 
-package cli
+package steam
 
 import "golang.org/x/sys/windows/registry"
 
-func getSteamPathWindows() (string, error) {
+func Path() (string, error) {
 	k, err := registry.OpenKey(registry.LOCAL_MACHINE, `SOFTWARE\WOW6432Node\Valve\Steam`, registry.QUERY_VALUE)
 	if err != nil {
 		return "", err

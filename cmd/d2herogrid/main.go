@@ -6,8 +6,7 @@ import (
 	"flag"
 	"log"
 
-	"github.com/PederHA/d2herogrid/cmd"
-	"github.com/PederHA/d2herogrid/cmd/cli"
+	"github.com/PederHA/d2herogrid/pkg/cli"
 	"github.com/PederHA/d2herogrid/pkg/model"
 )
 
@@ -29,26 +28,37 @@ func init() {
 	brackets = flag.Args()
 }
 
-func main() {
+func run() error {
 	// Parse CLI args
 	cfg, err := cli.Parse(name, layout, path, sortAsc, brackets)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
+	// Load contents of hero_grid_config.json
 	hgc, err := model.NewHeroGridConfig(cfg.Path)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	err = cfg.DumpYAML(cli.ConfigPath)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// Save user config (Implemented, but useless)
+	//err = cfg.DumpYAML(cli.ConfigPath)
+	//if err != nil {
+	//	return err
+	//}
 
-	app := cmd.NewApp(cfg, hgc)
+	app := NewApp(cfg, hgc)
 
 	err = app.Run()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func main() {
+	err := run()
 	if err != nil {
 		log.Fatal(err)
 	}

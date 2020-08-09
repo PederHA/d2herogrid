@@ -14,6 +14,7 @@ import (
 
 	"github.com/PederHA/d2herogrid/internal/utils"
 	"github.com/PederHA/d2herogrid/pkg/model"
+	"github.com/PederHA/d2herogrid/pkg/steam"
 	"github.com/mitchellh/go-homedir"
 )
 
@@ -137,19 +138,15 @@ func autodetectUserdataDir() (string, error) {
 	var s string
 	var err error
 	switch runtime.GOOS {
-	case "windows":
-		s, err = getSteamPathWindows()
-		if err != nil {
-			return "", err // TODO: write a more user-friendly error
-		}
-	case "darwin":
-		// Dynamic steam path detection NYI
-		s = "~/Library/Application Support/Steam"
-	case "linux":
-		// Dynamic steam path detection NYI
-		s = "~/Steam"
+	case "windows", "darwin", "linux":
+		s, err = steam.Path()
 	default:
-		return "", fmt.Errorf("config: Unsupported OS")
+		s, err = "", fmt.Errorf("config: Unsupported OS")
 	}
+
+	if err != nil {
+		return "", err
+	}
+
 	return path.Join(s, "userdata"), nil
 }

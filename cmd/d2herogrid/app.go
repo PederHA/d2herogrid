@@ -1,9 +1,9 @@
-package cmd
+package main
 
 import (
 	"sort"
 
-	"github.com/PederHA/d2herogrid/cmd/cli"
+	"github.com/PederHA/d2herogrid/pkg/cli"
 	"github.com/PederHA/d2herogrid/pkg/model"
 )
 

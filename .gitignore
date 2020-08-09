@@ -1,5 +1,23 @@
+# Extensions
 *.yml
-.vscode
 *.exe
 *.bak
+*.html
+
+# VSCode
+.vscode
+
+# Development files
 /hero_grid_config*
+
+# Scripts
+build.ps1
+release.ps1
+runtest.ps1
+runtest.sh
+versioninfo.json
+
+# goreleaser
+dist/
+
+___main.go
