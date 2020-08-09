@@ -21,3 +21,4 @@ versioninfo.json
 dist/
 
 ___main.go
+!.goreleaser.yml
