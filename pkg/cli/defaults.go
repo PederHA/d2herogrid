@@ -6,7 +6,7 @@ import (
 
 // UserConfig defaults
 var (
-	DefaultBrackets      = model.Brackets{model.BracketImmortal}
+	DefaultBrackets      = model.Brackets{model.BracketDivine}
 	DefaultGridName      = "d2hg"
 	DefaultLayout        = model.LayoutMainStat
 	DefaultSortAscending = false

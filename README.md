@@ -8,13 +8,13 @@ The application is able to generate many different hero grid layouts, as well as
 
 ## Usage
 ```
-> ./d2herogrid [OPTION]... [SKILL BRACKETS]...
+d2herogrid [PARAMS]... [SKILL BRACKETS]...
 
 
-DESCRIPTION: 
-The SKILL BRACKETS argument is one or more Dota 2 skill brackets that grids should be generated for.
+DESCRIPTION:      
+      The SKILL BRACKETS argument is one or more Dota 2 skill brackets that grids should be generated for.
 
-If no skill bracket argument is specified, it defaults to Immortal.
+      If no skill bracket argument is specified, it defaults to Divine.
 
 PARAMETERS:
   -l string
@@ -35,28 +35,28 @@ PARAMETERS:
 
 ### Examples
 
-#### New Immortal Main Stat Grid (Default)
+#### New Divine Main Stat Grid (Default)
 
 ```bash
-> ./d2herogrid
+d2herogrid
 ```
 
-#### New Divine Main Stat Grid
+#### New Immortal Main Stat Grid
 
 ```bash
-> ./d2herogrid divine
+d2herogrid immortal
 ```
 
-#### New Divine Attack Type Grid
+#### New Immortal Attack Type Grid
 
 ```bash
-> ./d2herogrid -layout a divine
+d2herogrid -layout a immortal
 ```
 
 #### New Herald, Guardian & Crusader Role Grids
 
 ```bash
-> ./d2herogrid -layout role herald guardian crusader
+d2herogrid -layout role herald guardian crusader
 ```
 
 ## Installation
@@ -68,5 +68,5 @@ Alternatively, the program can be launched from anywhere using the `-p <path>` o
 ### Example
 
 ```bash
-> ./d2herogrid -p "C:\Program Files (x86)\Steam\userdata\<your_steamID3>\570\remote\cfg" [OPTIONS] [ARGS]
+d2herogrid -p "C:\Program Files (x86)\Steam\userdata\<your_steamID3>\570\remote\cfg" [PARAMS]... [ARGS]...
 ```
